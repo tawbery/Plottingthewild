@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plotting the Wild | Marine Ecological Modelling</title>
+<meta name="description" content="Plotting the Wild: marine ecological modelling consultancy run by Dr Tim Awbery. Density surface models, distance sampling, species distribution models and cetacean surveys.">
+<meta property="og:title" content="Plotting the Wild">
+<meta property="og:description" content="Marine ecological modelling: getting more from imperfect data.">
+<meta property="og:type" content="website">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f4ef;
+    --surface: #ffffff;
+    --ink: #13232e;
+    --muted: #4f6270;
+    --line: #d9dfe2;
+    --accent: #0f6a73;
+    --accent-ink: #ffffff;
+    --deep: #0c2a36;
+    --deep-ink: #e8f1f2;
+    --contour: rgba(15, 106, 115, 0.13);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b1a22;
+      --surface: #11252f;
+      --ink: #e6eef0;
+      --muted: #9fb2bb;
+      --line: #22404c;
+      --accent: #5cc3c9;
+      --accent-ink: #06222a;
+      --deep: #071419;
+      --deep-ink: #e6eef0;
+      --contour: rgba(92, 195, 201, 0.12);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 17px/1.65 "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: "Fraunces", Georgia, serif; font-weight: 600; line-height: 1.2; margin: 0 0 .6em; }
+  h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); letter-spacing: -0.01em; }
+  h2 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); }
+  h3 { font-size: 1.15rem; }
+  p { margin: 0 0 1em; }
+  a { color: var(--accent); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 80px 0; }
+  .eyebrow { font-size: .78rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: .8em; }
+
+  /* Header */
+  header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font-family: "Fraunces", serif; font-weight: 600; font-size: 1.1rem; }
+  .brand img { width: 38px; height: 38px; object-fit: contain; }
+  nav { display: flex; gap: 22px; }
+  nav a { color: var(--muted); text-decoration: none; font-size: .92rem; font-weight: 500; }
+  nav a:hover { color: var(--ink); }
+  @media (max-width: 640px) { nav a:not(.nav-cta) { display: none; } }
+
+  /* Hero */
+  .hero { position: relative; overflow: hidden; padding: 110px 0 100px; }
+  .hero svg.contours { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .hero .wrap { position: relative; }
+  .hero p.lede { font-size: 1.2rem; color: var(--muted); max-width: 38em; }
+  .status { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; font-size: .88rem; color: var(--muted); background: var(--surface); }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e0a43a; }
+  .btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .btn { display: inline-block; padding: 12px 22px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: .95rem; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-ghost { border: 1px solid var(--line); color: var(--ink); }
+
+  /* Approach */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  @media (max-width: 760px) { .two-col { grid-template-columns: 1fr; gap: 24px; } }
+
+  /* Services */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; margin-top: 30px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 24px; }
+  .card p { color: var(--muted); font-size: .95rem; margin: 0; }
+  .card .num { font-family: "Fraunces", serif; color: var(--accent); font-size: .9rem; margin-bottom: 10px; display: block; }
+
+  /* Projects */
+  .projects { list-style: none; padding: 0; margin: 30px 0 0; border-top: 1px solid var(--line); }
+  .projects li { display: grid; grid-template-columns: 1fr auto; gap: 4px 20px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .projects .title { font-weight: 600; }
+  .projects .where { color: var(--muted); font-size: .92rem; grid-column: 1; }
+  .projects .place { color: var(--muted); font-size: .9rem; text-align: right; grid-row: 1 / span 2; grid-column: 2; align-self: center; }
+  .projects a { text-decoration: none; }
+  .projects a:hover { text-decoration: underline; }
+
+  /* Deep band */
+  .deep { background: var(--deep); color: var(--deep-ink); }
+  .deep .eyebrow { color: #7fd0d4; }
+  .stats { display: flex; flex-wrap: wrap; gap: 40px; margin-bottom: 50px; }
+  .stat b { display: block; font-family: "Fraunces", serif; font-size: 2.6rem; line-height: 1; }
+  .stat span { font-size: .85rem; opacity: .75; text-transform: uppercase; letter-spacing: .1em; }
+  blockquote { margin: 0; font-family: "Fraunces", serif; font-size: clamp(1.25rem, 2.6vw, 1.6rem); line-height: 1.45; max-width: 34em; }
+  .cite { margin-top: 18px; font-size: .92rem; opacity: .8; }
+
+  /* Contact */
+  .contact { text-align: center; }
+  .contact p { color: var(--muted); max-width: 34em; margin-left: auto; margin-right: auto; }
+  .email { font-family: "Fraunces", serif; font-size: clamp(1.3rem, 4vw, 1.9rem); text-decoration: none; display: inline-block; margin: 10px 0 24px; word-break: break-all; }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0; font-size: .88rem; color: var(--muted); }
+  footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top"><img src="logo.png" alt="Plotting the Wild logo">Plotting the Wild</a>
+    <nav>
+      <a href="#services">Services</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact" class="nav-cta">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <svg class="contours" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g fill="none" stroke="var(--contour)" stroke-width="1.5">
+        <path d="M-50 420 C200 360 360 470 600 400 S1000 300 1260 360"/>
+        <path d="M-50 460 C220 400 380 510 620 440 S1010 340 1260 400"/>
+        <path d="M-50 500 C240 440 400 550 640 480 S1020 380 1260 440"/>
+        <path d="M-50 540 C260 480 420 590 660 520 S1030 420 1260 480"/>
+        <path d="M-50 380 C180 320 340 430 580 360 S990 260 1260 320"/>
+        <path d="M-50 340 C160 280 320 390 560 320 S980 220 1260 280"/>
+        <ellipse cx="930" cy="150" rx="150" ry="80"/>
+        <ellipse cx="930" cy="150" rx="105" ry="54"/>
+        <ellipse cx="930" cy="150" rx="60" ry="30"/>
+      </g>
+    </svg>
+    <div class="wrap">
+      <div class="eyebrow">Marine ecological modelling</div>
+      <h1>Getting more from<br>imperfect data.</h1>
+      <p class="lede">I'm Dr Tim Awbery, a marine ecologist specialising in cetacean distribution and abundance. I turn messy, opportunistic and hard-won survey data into results that inform policy and protected-area design.</p>
+      <div class="status">Fully booked to April 2027 · taking enquiries for later in 2027</div>
+      <div class="btns">
+        <a class="btn btn-primary" href="#contact">Get in touch</a>
+        <a class="btn btn-ghost" href="#projects">See projects</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="approach" style="padding-top:20px">
+    <div class="wrap two-col">
+      <div>
+        <div class="eyebrow">Science to policy</div>
+        <h2>Making the science count</h2>
+        <p>The first step in conservation is showing there is a problem. The second is showing how big it is. That's where most science stops, but it isn't conservation yet.</p>
+        <p>I enjoy projects that have the whole pipeline in mind, from data collection to meaningful change. Most of my work feeds directly into policy recommendations or the design of protected areas.</p>
+      </div>
+      <div>
+        <div class="eyebrow">Real-world data</div>
+        <h2>The data is never perfect</h2>
+        <p>Fieldwork gets messy. The weather turns, crew get ill, budgets run short, and you rarely get a second chance. That doesn't mean the data is wasted.</p>
+        <p>You may not be able to run the analysis you planned, but with the right tools there's almost always something valuable to be learned. Discounted rates are available for non-profit organisations.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" style="padding-top:20px">
+    <div class="wrap">
+      <div class="eyebrow">Services</div>
+      <h2>What I do</h2>
+      <div class="grid">
+        <div class="card"><span class="num">01</span><h3>Abundance estimation</h3><p>Distance sampling and density surface models to estimate how many animals are present and where.</p></div>
+        <div class="card"><span class="num">02</span><h3>Species distribution models</h3><p>Dynamic SDMs built from a range of data sources, specialising in non-systematic, opportunistic and citizen-science data.</p></div>
+        <div class="card"><span class="num">03</span><h3>Bayesian spatial modelling</h3><p>INLA and inlabru models that handle spatial structure and uncertainty in complex datasets.</p></div>
+        <div class="card"><span class="num">04</span><h3>Surveys and acoustics</h3><p>Land- and boat-based visual and acoustic surveys in some of the world's most data-deficient regions.</p></div>
+        <div class="card"><span class="num">05</span><h3>Human pressures</h3><p>Mapping the distribution and magnitude of human impacts and their overlap with marine mammals.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" style="padding-top:20px">
+    <div class="wrap">
+      <div class="eyebrow">Selected work</div>
+      <h2>Projects</h2>
+      <ul class="projects">
+        <li><span class="title"><a href="https://superdtp.st-andrews.ac.uk/super-pgrs-cohort-3/tim-awbery/">Minke whales</a></span><span class="where">Dynamic distribution and abundance models</span><span class="place">Scotland</span></li>
+        <li><span class="title">Sperm whales of the Hellenic Trench</span><span class="where">Density surface modelling and abundance estimation</span><span class="place">Greece</span></li>
+        <li><span class="title"><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5220799">Bottlenose dolphin distribution</a></span><span class="where">Species distribution models</span><span class="place">Malta</span></li>
+        <li><span class="title">Giant Guardians II</span><span class="where">Offshore visual and acoustic surveys</span><span class="place">Türkiye</span></li>
+        <li><span class="title">Dolphin research</span><span class="where">Low-budget baseline surveys</span><span class="place">Montenegro</span></li>
+        <li><span class="title">First dedicated cetacean surveys</span><span class="where">Baseline surveys</span><span class="place">Albania</span></li>
+        <li><span class="title"><a href="https://www.acs-sfbay.org/events/2025/4/29/going-the-distance-one-humpbacks-journey-of-migration">Migratory pathways</a></span><span class="where">Humpback whale surveys</span><span class="place">Tanzania</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="deep">
+    <div class="wrap">
+      <div class="stats">
+        <div class="stat"><b>4</b><span>Continents</span></div>
+        <div class="stat"><b>15</b><span>Countries</span></div>
+        <div class="stat"><b>∞</b><span>Complex spatial problems</span></div>
+      </div>
+      <div class="eyebrow">What collaborators say</div>
+      <blockquote>“I would without a doubt recommend Tim Awbery and Plotting the Wild. We have engaged Tim in a number of complex spatial projects and he has always found a solution!”</blockquote>
+      <div class="cite">Dr Aylin Akkaya, Founder and Scientific Director, DMAD – Marine Mammals Research Association</div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="wrap">
+      <div class="eyebrow">Contact</div>
+      <h2>Have a project in mind?</h2>
+      <p>I'm based in Dunedin, New Zealand, and work with organisations worldwide. Get in touch to talk about your data and what it could tell you.</p>
+      <a class="email" href="mailto:YOUR-EMAIL@plottingthewild.com">YOUR-EMAIL@plottingthewild.com</a>
+      <div class="btns" style="justify-content:center;margin-top:0">
+        <a class="btn btn-ghost" href="https://www.linkedin.com/in/YOUR-LINKEDIN">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Plotting the Wild</span>
+    <span>Dunedin, Aotearoa New Zealand</span>
+  </div>
+</footer>
+
+</body>
+</html>
